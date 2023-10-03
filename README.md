@@ -1,10 +1,10 @@
 # Diagnosing_PCOS
 Polycystic ovary syndrome (PCOS) is a common condition that affect women and are characterized by having two or more of the following features: irregular periods, excess male hormones that may lead to excess facial and body hair growth, polycystic ovaries (enlarged ovaries containing fluid filled sacks called follicles). 
 
-The dataset used in this project is contains all physical and clinical parameters to determine PCOS and infertility related issues. The data has been collected from 10 different hospital across Kerala,India and is available to access freely from https://www.kaggle.com/datasets/prasoonkottarathil/polycystic-ovary-syndrome-pcos
+The dataset used in this project contains numerous physical and clinical parameters to determine PCOS and infertility related issues. The data has been collected from 10 different hospital across Kerala,India and is available to access freely from https://www.kaggle.com/datasets/prasoonkottarathil/polycystic-ovary-syndrome-pcos
 
 ## Motivation for choice of project:
-I was diagnosed with PCOS last year. However, I have been experiencing symptoms for many years before and have visited other doctors before. In India, there is a large tendency to ignore PCOS in unmarried woman. Even well-trained gynacologists do not understand the importance of diagnosis and treatment of PCOS unless you are trying to get pregnant. The fact that it drastically reduces quality of life for many women is not taken into account and doctors tend to do no more than advise to exercise and eat healthy. I realised that building a machine learning model using objective metrics to diagnose PCOS can greatly improve women's healthcare and make more doctors and women take PCOS seriously.
+I was diagnosed with PCOS in 2022. However, I have been experiencing symptoms for many years before and have visited other doctors before. In India, there is a large tendency to ignore PCOS in unmarried woman. The fact that it drastically reduces quality of life for many women is not taken into account and doctors tend to do no more than advise to exercise and eat healthy. Therfore I became interested in exploring ways that I can use my data science skills to improve healthcare for women.
 
 The aim of this project is to use an appropriate classification model to diagnose PCOS. The use of machine learning in situations like these can help process large amounts of data to gain accurate diagnosis and thus possibly help reduce healthcare costs.
 
