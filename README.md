@@ -4,7 +4,7 @@ Polycystic ovary syndrome (PCOS) is a common condition that affect women and are
 The dataset used in this project contains numerous physical and clinical parameters to determine PCOS and infertility related issues. The data has been collected from 10 different hospital across Kerala,India and is available to access freely from https://www.kaggle.com/datasets/prasoonkottarathil/polycystic-ovary-syndrome-pcos
 
 ## Motivation for choice of project:
-I was diagnosed with PCOS in 2022. However, I have been experiencing symptoms for many years before and have visited other doctors before. In India, there is a large tendency to ignore PCOS in unmarried woman. The fact that it drastically reduces quality of life for many women is not taken into account and doctors tend to do no more than advise to exercise and eat healthy. Therfore I became interested in exploring ways that I can use my data science skills to improve healthcare for women.
+I was diagnosed with PCOS in 2022. However, I have been experiencing symptoms for many years before and have visited other doctors before. In India, there is a large tendency to ignore PCOS in unmarried women, even by experienced gynecologists. The fact that it drastically reduces quality of life for many women is not taken into account and doctors tend to do no more than advise to exercise and eat healthy. Therfore, I became interested in exploring ways that I can use my data science skills to improve healthcare for women with PCOS.
 
 The aim of this project is to use an appropriate classification model to diagnose PCOS. The use of machine learning in situations like these can help process large amounts of data to gain accurate diagnosis and thus possibly help reduce healthcare costs.
 
