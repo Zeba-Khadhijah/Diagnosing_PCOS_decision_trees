@@ -1,0 +1,169 @@
+---
+title: "Diagnosing PCOS"
+author: "Zeba Khadhijah"
+date: '2023-03-01'
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning = FALSE)
+```
+
+## About the Data
+
+Polycystic ovary syndrome (PCOS) is a common condition that affect women and are characterized by having two or more of the following features: irregular periods, excess amounts of male hormones that may lead to excess facial and body hair growth, polycystic ovaries (enlarged ovaries containing fluid filled sacks called follicles). 
+
+The dataset used in this project contains many physical and clinical parameters to determine PCOS and infertility related issues. The data has been collected from 10 different hospital across Kerala,India and is available to access freely from https://www.kaggle.com/datasets/prasoonkottarathil/polycystic-ovary-syndrome-pcos
+
+The aim of this project is to use an appropriate classification model to diagnose PCOS. The use of machine learning in situations like these can help process large amounts of data to gain accurate diagnosis and help reduce healthcare costs.
+
+
+First, we load the required packages. The readme file provides information about these packages:
+```{r}
+library(readxl)
+library(tidyverse)
+library(plyr)
+library(dplyr)
+library(ggplot2)
+library(Hmisc)
+library(stats)
+library(corrplot)
+library(psych)
+library(DescTools)
+library(caret)
+library(tree)
+library(rpart)
+library(rattle)
+```
+
+Next, we read the data:
+```{r}
+df <- read_excel("PCOS_data_without_infertility.xlsx", sheet = "Full_new")
+
+head(df,5)
+```
+
+Data Cleaning Steps:
+```{r}
+#dropping redundant columns
+df <- df[-c(1,45)]
+
+#check data type
+d_type <- sapply(df, class)
+print(d_type)
+
+```
+```{r}
+#change character to numeric values
+df[c(17, 25)]<- lapply(df[c(17, 25)], as.numeric)
+
+#check for missing values
+missing_val <- colSums(is.na(df))
+print(missing_val)
+
+```
+```{r}
+#replace missing data with median value
+
+df$"Marraige Status (Yrs)"[is.na(df$"Marraige Status (Yrs)")] <- median(
+  df$"Marraige Status (Yrs)", na.rm = T)
+
+df$`II    beta-HCG(mIU/mL)`[is.na(df$`II    beta-HCG(mIU/mL)`)]<- median(
+  df$`II    beta-HCG(mIU/mL)`, na.rm = T)
+
+df$`AMH(ng/mL)`[is.na(df$`AMH(ng/mL)`)]<- median(
+  df$`AMH(ng/mL)`, na.rm = T)
+
+df$`Fast food (Y/N)`[is.na(df$`Fast food (Y/N)`)]<- median(
+  df$`Fast food (Y/N)`, na.rm = T)
+```
+
+##Exploratory Data Analysis
+
+As we can see, there are numerous variables available with us. For a comprehensive model without noise, we should use factors that we know is likely to have an impact on our outcome variable (whether PCOS is present or not). Therefore, lets start by finding all the significant correlations between the predictors and the outcome variable in the data: 
+
+```{r}
+#checking correlations
+
+# choose the column to correlate with the others
+outcome_var <- "PCOS (Y/N)"
+
+# initialize an empty data frame to store the results
+corr_df <- data.frame(col1 = character(), col2 = character(), correlation = numeric(), p_value = numeric(), stringsAsFactors = FALSE)
+
+# loop through all columns in the data frame
+for (col in names(df)) {
+  if (col != outcome_var) {
+    # calculate the correlation and test for significance
+    corr <- cor.test(df[[outcome_var]], df[[col]], method = "pearson")
+    # check if the p-value is less than 0.05
+    if (corr$p.value < 0.05) {
+      # add the results to the data frame
+      corr_df <- rbind(corr_df, data.frame(col1 = outcome_var, col2 = col, correlation = corr$estimate, p_value = corr$p.value, stringsAsFactors = FALSE))
+    }
+  }
+}
+
+# print the data frame
+print(corr_df)
+```
+We can see that there are 23 factors that have a significant correlation with the presence or absence of PCOS. To avoid overfitting and get a simpler and more comprehensive model, we will select only the factors with strongest correlation to the outcome variable. Therefore this model will have 7 predictor variables.
+```{r}
+new_df <-df[c(2,11,30,31,32,35,39,40)]
+
+colnames(new_df)
+```
+Multicollinearity can be a problem in simple classification models. Therefore let's check the predictor variables for correlations between them:
+```{r}
+# calculate correlation matrix and significance values of new_df
+corr_mat <- corr.test(new_df, method = "pearson")$r
+p_mat <- corr.test(new_df, method = "pearson")$p
+
+# combine correlation matrix and significance values into a single matrix
+corr_p_mat <- matrix(paste(round(corr_mat, 2), ifelse(p_mat < 0.05, "*", " "), sep = ""), ncol = ncol(new_df))
+rownames(corr_p_mat) <- colnames(corr_p_mat) <- colnames(new_df)
+print(corr_p_mat)
+```
+We can see that the predictors are significantly correlated with each other. Therefore we need to use a classification model that is robust to multicollinearity. We will use the decision tree classification model.
+
+
+```{r}
+#change classifer to factor variable
+new_df$'PCOS (Y/N)'<- factor(new_df$'PCOS (Y/N)')
+
+# split data into train and test sets
+set.seed(123)
+trainIndex <- createDataPartition(new_df$'PCOS (Y/N)', p = 0.7, list = FALSE)
+train <- new_df[trainIndex, ]
+test <- new_df[-trainIndex, ]
+
+```
+
+We can now train our decision tree model and make predictions on the test data:
+```{r}
+# create the decision tree model
+tree_model <- rpart(train$`PCOS (Y/N)` ~ ., data = train)
+
+# Make predictions on testing set
+predictions <- predict(tree_model, test, type = "class")
+```
+
+Let us now check how accurate our model is:
+```{r}
+# Create confusion matrix
+cm <- confusionMatrix(predictions, test$'PCOS (Y/N)')
+print(cm)
+```
+The above metrics demonstrate a 84.5% accuracy of the model with the test data.
+
+The confusion matrix shows the number of true positives (37), false positives (16), false negatives(9), and true negatives (100) in predicting the target variable. Therefore, the model correctly predicted 37 cases of PCOS out of 53 actual cases, and 100 cases of no PCOS out of 109 actual no PCOS cases.
+
+Sensitivity is the proportion of true positives out of the total number of positive instances in the testing set, while specificity is the proportion of true negatives out of the total number of negative instances in the testing set. In this case, the model is more sensitive than specific.
+
+The positive predictive value is the proportion of true positives out of the total number of predicted positives, while the negative predictive value is the proportion of true negatives out of the total number of predicted negatives. Prevalence is the proportion of instances in the testing set that belong to the positive class.
+
+Detection rate is the proportion of true positives out of the total number of instances in the testing set, while detection prevalence is the proportion of predicted positives out of the total number of instances in the testing set. Finally, balanced accuracy is the arithmetic mean of sensitivity and specificity.
+
+In conclusion, by selecting the most relevant features, we have built a decision tree classification model to diagnose PCOS. Optimization techniques and other machine learning algorithms should be explored to improve accuracy in the future.
